@@ -1,6 +1,6 @@
 const express = require('express')
 const routes = require('./routes/tasks')
-require('./db/connect')
+const connectedDb = require('./db/connect')
 const app = express()
 const port = 3000
 
@@ -9,4 +9,14 @@ app.use(express.json())
 
 // Routes 
 app.use('/api/v1/tasks/', routes)
-app.listen(port, console.log(`Server Is Listening On Port ${port}...`))
+
+const start = async ()=> {
+    try {
+        await connectedDb()
+        app.listen(port, console.log(`Server Is Listening On Port ${port}...`))
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+start()
