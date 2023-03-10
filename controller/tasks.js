@@ -1,22 +1,75 @@
+const Task = require('../models/task');
+const asyncWrapper = require('../middleware/async')
+const getAllTasks = asyncWrapper( async (req, res)=> {
+     const tasks = Task.find({})
+      res.status(200).json(tasks)
+})
 
-const getAllTasks =  (req,res)=>{
-    res.send('Get ALl Tasks')
+
+const createTask = asyncWrapper (
+   async (req, res)=> {
+         const task = await Task.create(req.body)
+         res.status(201).json({
+            msg: "Success",
+            task: task
+         });
+
+   }) 
+
+const getTask = asyncWrapper (async (req, res)=> {
+      const { id } = req.params
+   const task = await Task.findOne({_id:id})
+   if(!task){
+      return res.status(404).json({msg: `There is No Task with ID ${id}`})
+   }
+     res.status(200).json({
+      msg: 'Success',
+      task: task
+   })
+})
+
+
+
+const deleteTask = async (req, res)=> {
+   try {
+      const { id } = req.params
+      const task =  await Task.findByIdAndDelete({_id: id})
+      if(!task){
+         return res.status(404).json({msg: `There is No Task with ID ${id}`})
+      }
+       res.status(200).json({
+         task: null,
+        msg: 'This Task Is Deleted'
+      })
+   } catch (error) {
+      res.status(500).json({
+         error: error.message
+      });
+   } 
 }
 
-const createTask = (req, res)=> {
-   res.send('Create task')
-}
+const UpdateTask = async (req, res)=> {
 
-const getTask = (req, res)=> {
-   res.status(200).json({id: req.params.id});
-}
+   try {
+      const {id} = req.params
+   const task = await Task.findByIdAndUpdate(id, req.body, {
+      new: true,
+      runValidators: true,
+   });
+   if(!task){
+      return res.status(404).json({msg: `There is No Task with ID ${id}`})
+   }
+   res.status(201).json({
+     id: id,
+     task: task
+     
+   })
+   } catch (error) {
+      res.status(500).json({
+         error: error.message
+      }); 
+   }
 
-const UpdateTask = (req, res)=> {
-   res.send('Update Task');
-}
-
-const deleteTask = (req, res)=> {
-   res.send('Delete Task');
 }
 
 module.exports = { 
